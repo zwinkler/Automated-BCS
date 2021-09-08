@@ -58,6 +58,16 @@ config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, fps)
 # Start streaming
 pipe_profile = pipeline.start(config)
 
+decimation = rs.decimation_filter()
+decimation.set_option(rs.option.filter_magnitude, 2)
+
+spatial = rs.spatial_filter()
+spatial.set_option(rs.option.filter_magnitude, 5)
+spatial.set_option(rs.option.filter_smooth_alpha, 1)
+spatial.set_option(rs.option.filter_smooth_delta, 50)
+spatial.set_option(rs.option.holes_fill, 2)
+
+
 depth_sensor = pipe_profile.get_device().first_depth_sensor()
 
 depth_sensor.set_option(rs.option.exposure, 2000)
@@ -89,6 +99,12 @@ try:
         depth_frame = frames.get_depth_frame()
         color_frame = frames.get_color_frame()
         
+    
+        #filtering
+        decimated_depth = decimation.process(depth_frame)
+        filtered_depth = spatial.process(decimated_depth)
+    
+        
         if not depth_frame or not color_frame:
             continue
 
@@ -106,6 +122,13 @@ try:
         cv2.imshow('depth', depth_colormap)
         cv2.waitKey(1)
         #cv2.imshow("depth frame", depth_image)
+      
+    
+    
+        # Consider stopping the pipeline here to save power, but you will need to start it again when you want to take a picture
+        
+        
+        
         
         #n = n+1
         
