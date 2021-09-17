@@ -99,6 +99,7 @@ try:
         depth_frame = frames.get_depth_frame()
         color_frame = frames.get_color_frame()
         
+        
     
         #filtering
         decimated_depth = decimation.process(depth_frame)
@@ -158,6 +159,7 @@ try:
             depth_rgb = depth_colormap[:, :, [2, 1, 0]]
             depth = Image.fromarray(depth_image)
             depth.save(f"Camera/images/{timeStamp}/{tag}_{img_num}_D.tif", "TIFF")
+            rs.save_single_frameset(f"Camera/images/{timeStamp}/{tag}_{img_num}_D").process(depth_frame)
             img_num+=1
             
         n = n+1
