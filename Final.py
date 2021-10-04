@@ -68,9 +68,9 @@ spatial.set_option(rs.option.filter_smooth_delta, 50)
 spatial.set_option(rs.option.holes_fill, 2)
 
 
-depth_sensor = pipe_profile.get_device().first_depth_sensor()
+#depth_sensor = pipe_profile.get_device().first_depth_sensor()
 
-depth_sensor.set_option(rs.option.exposure, 2000)
+#depth_sensor.set_option(rs.option.exposure, 2000)
 
 n = 0
 img_num = 0
@@ -90,7 +90,7 @@ try:
             except FileExistsError:
                 pass
                 
-            time.sleep(60)
+            #time.sleep(60)
         
         time_flag = True
         
@@ -152,13 +152,16 @@ try:
                 tag = 'No_RFID'
             
 
-            color_rgb = color_image[:, :, [2, 1, 0]]
-            color = Image.fromarray(color_rgb)
-            color.save(f"Camera/images/{timeStamp}/{tag}_{img_num}_C.tif", "TIFF")
+            #color_rgb = color_image[:, :, [2, 1, 0]]
+            #color = Image.fromarray(color_rgb)
+            #color.save(f"Camera/images/{timeStamp}/{tag}_{img_num}_C.tif", "TIFF")
             
-            depth_rgb = depth_colormap[:, :, [2, 1, 0]]
-            depth = Image.fromarray(depth_image)
-            depth.save(f"Camera/images/{timeStamp}/{tag}_{img_num}_D.tif", "TIFF")
+            #depth_rgb = depth_colormap[:, :, [2, 1, 0]]
+            #depth = Image.fromarray(depth_image)
+            #depth.save(f"Camera/images/{timeStamp}/{tag}_{img_num}_D.tif", "TIFF")
+            
+            cv2.imwrite(f"Camera/images/{timeStamp}/{tag}_{img_num}_D.tif", depth_image)
+            cv2.imwrite(f"Camera/images/{timeStamp}/{tag}_{img_num}_C.tif", color_image)
             rs.save_single_frameset(f"Camera/images/{timeStamp}/{tag}_{img_num}_D").process(depth_frame)
             img_num+=1
             
