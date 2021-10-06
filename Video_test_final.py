@@ -32,8 +32,8 @@ if(mode == "video"):
             except FileExistsError:
                 pass
             
-            out1 = cv2.VideoWriter(f'Camera/videos/{timeStamp}/C.avi',cv2.VideoWriter_fourcc('X','V','I','D'), fps, (640,480))
-            out2 = cv2.VideoWriter(f'Camera/videos/{timeStamp}/D.avi',cv2.VideoWriter_fourcc('X','V','I','D'), fps, (640,480))
+#             out1 = cv2.VideoWriter(f'Camera/videos/{timeStamp}/C.avi',cv2.VideoWriter_fourcc('X','V','I','D'), fps, (640,480))
+#             out2 = cv2.VideoWriter(f'Camera/videos/{timeStamp}/D.avi',cv2.VideoWriter_fourcc('X','V','I','D'), fps, (640,480))
             
 elif(mode == "image"):
     try:
@@ -45,22 +45,17 @@ elif(mode == "image"):
         pass
 
 # Configure depth and color streams
-pipeline = rs.pipeline()
-config = rs.config()
-config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, fps)
-config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, fps)
+if mode == 'image':
+    pipeline = rs.pipeline()
+    config = rs.config()
+    config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, fps)
+    config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, fps)
 
-# record .bag file
-#config.enable_record_to_file('object_detection3.bag')
+    pipe_profile = pipeline.start(config)
 
 
-
-# Start streaming
-pipe_profile = pipeline.start(config)
-
-decimation = rs.decimation_filter()
-decimation.set_option(rs.option.filter_magnitude, 2)
-
+    #decimation = rs.decimation_filter()
+    #decimation.set_option(rs.option.filter_magnitude, 2)
 spatial = rs.spatial_filter()
 spatial.set_option(rs.option.filter_magnitude, 5)
 spatial.set_option(rs.option.filter_smooth_alpha, 1)
@@ -68,15 +63,13 @@ spatial.set_option(rs.option.filter_smooth_delta, 50)
 spatial.set_option(rs.option.holes_fill, 2)
 
 thresh = rs.threshold_filter(min_dist = 0.1, max_dist = 3.0)
-#thresh.set_option(min_dist = 0.1)
-#thresh.set_option(max_dist = 3.0)
 
 depth_sensor = pipe_profile.get_device().first_depth_sensor()
-
 depth_sensor.set_option(rs.option.enable_auto_exposure, True)
 
 n = 0
 img_num = 0
+vid_num = 0
 time_flag = True
 try:
     while True:
@@ -93,7 +86,7 @@ try:
             except FileExistsError:
                 pass
                 
-            time.sleep(60)
+            #time.sleep(60)
         
         time_flag = True
         
@@ -108,7 +101,7 @@ try:
         #decimated_depth = decimation.process(depth_frame)
         thresh_frame = thresh.process(depth_frame)
         filtered_depth = spatial.process(thresh_frame)
-    
+        
         
         if not depth_frame or not color_frame:
             continue
@@ -127,33 +120,50 @@ try:
         cv2.imshow('depth', depth_colormap)
         cv2.waitKey(1)
         #cv2.imshow("depth frame", depth_image)
-      
-    
-    
-        # Consider stopping the pipeline here to save power, but you will need to start it again when you want to take a picture
-        
-        
-        
         
         #n = n+1
+        
+        reader.set_region("NA2")
+        reader.set_read_plan([1], "GEN2", bank=["user"], read_power=power)
+        tag = reader.read(timeout=500)
+        if len(tag)!=0:
+            tag = str(bytes.fromhex(reader.read()[0].epc.decode('utf-8')))
+            tag = tag[2:-1]
+        if len(tag) == 0:
+            tag = 'No_RFID'
+        
         
         #Check for proximity
         proximity = bool(GPIO.input(13))
         
         if(mode == "video") and (proximity == True):
-            out1.write(color_image)
-            out2.write(depth_colormap)
+            pipeline = rs.pipeline()
+            config = rs.config()
+            config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, fps)
+            config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, fps)
+
+            pipe_profile = pipeline.start(config)
+
+            config.enable_record_to_file(f"Camera/videos/{timeStamp}/{tag}_{vid_num}")
+            pipeline.start(config)
+            
+            frames = pipeline.wait_for_frames()
+            depth_frame = frames.get_depth_frame()
+            color_frame = frames.get_color_frame()
+        
+            thresh_frame = thresh.process(depth_frame)
+            filtered_depth = spatial.process(thresh_frame)
+            
+            while proximity == True:
+                proximity = bool(GPIO.input(13))
+                if proximity == False:
+                    pipeline.stop()
+                    break
+            vid_num+=1
+#             out1.write(color_image)
+#             out2.write(depth_colormap)
             
         elif(mode == "image") and (n%20 == 0) and (proximity == True):
-            
-            reader.set_region("NA2")
-            reader.set_read_plan([1], "GEN2", bank=["user"], read_power=power)
-            tag = reader.read(timeout=500)
-            if len(tag)!=0:
-                tag = str(bytes.fromhex(reader.read()[0].epc.decode('utf-8')))
-                tag = tag[2:-1]
-            if len(tag) == 0:
-                tag = 'No_RFID'
             
 
             #color_rgb = color_image[:, :, [2, 1, 0]]
@@ -163,8 +173,9 @@ try:
             #depth_rgb = depth_colormap[:, :, [2, 1, 0]]
             #depth = Image.fromarray(depth_image)
             #depth.save(f"Camera/images/{timeStamp}/{tag}_{img_num}_D.tif", "TIFF")
-            cv2.imwrite(f"Camera/images/{timeStamp}/{tag}_{img_num}_C.tif", color_image)
+            
             cv2.imwrite(f"Camera/images/{timeStamp}/{tag}_{img_num}_D.tif", depth_image)
+            cv2.imwrite(f"Camera/images/{timeStamp}/{tag}_{img_num}_C.tif", color_image)
             rs.save_single_frameset(f"Camera/images/{timeStamp}/{tag}_{img_num}_D").process(depth_frame)
             img_num+=1
             
