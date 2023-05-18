@@ -1,7 +1,6 @@
 # Automated-BCS
-Automated BCS
 
-This is the repository for the Automatic Cattle Body Condition Scoring Project. Before starting, please refer the the included .yml of .txt files to recreate te environment.
+This is the repository for the Automatic Cattle Body Condition Scoring Project. Before starting, please refer to 'Automatic_BCS.yml' or 'Automatic_BCS.txt' files to recreate the environment.
 
 In the event that more data is needed, please gather it according to the procedure outlined in the <PAPER>, then use BAG_to_DGE to extract the data. It should extract high quality data by itself provided the data gathering procedure is followed correctly. It is still recommended that the results are reviewed manually. It should output the resulting images to working_directory\dataset_folder_processed\BCS_class\frame_number_DGE.tif, and assumes the bag files are in this architecture: working directory (that this notebook is in)\dataset folder\BCS class each bagfile belongs to\bagfiles themselves.
   
