@@ -24,7 +24,7 @@ Next, `BEiT_py_lightnining.ipynb` can be used for training a model. It relies on
 
 ## Abstract
 
-This dataset contains a collection of preclassified Criollo cow RGB+depth videos, as well as processed depth, grayscale, and edge images. The dataset was previously used to train convolutional neural networks and vision transformers to estimate body condition scores of cattle, and will be useful to other researchers in need a high quaility visual dataset that incorporates depth for the purposes of a three dimensional representations of cattle. The availability of compatible software and image processing packages makes this dataset very robust and applicable to other areas of both agricultural and machine learning research. This dataset has several features that make it a good test of machine learning algorithms such as low sample uniqueness and a slightly subjective metric.
+This dataset contains a collection of preclassified Criollo cow RGB+depth videos, as well as processed depth, grayscale, and edge images. The dataset was previously used to train convolutional neural networks and vision transformers to estimate body condition scores of cattle, and will be useful to other researchers in need a high quaility visual dataset that incorporates depth for the purposes of three dimensional representations of cattle. The availability of compatible software and image processing packages makes this dataset very robust and applicable to other areas of both agricultural and machine learning research. This dataset has several features that make it a good test of machine learning algorithms such as low sample uniqueness and a slightly subjective metric.
 
 
 ## Methods
